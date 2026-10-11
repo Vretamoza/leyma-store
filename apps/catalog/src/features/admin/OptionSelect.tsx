@@ -45,8 +45,8 @@ export default function OptionSelect(props: {
         <input
           className={input}
           autoFocus
-          placeholder={`Nueva ${props.noun}`}
-          aria-label={`Nueva ${props.noun}`}
+          placeholder={`Nombre (${props.noun})`}
+          aria-label={`Nombre de ${props.noun}`}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -90,7 +90,7 @@ export default function OptionSelect(props: {
           {o.name}
         </option>
       ))}
-      <option value="__new">＋ Nueva {props.noun}…</option>
+      <option value="__new">＋ Agregar {props.noun}…</option>
     </select>
   );
 }
