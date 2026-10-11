@@ -16,10 +16,11 @@ export default function SettingsForm({ settings }: { settings: Record<string, an
     payment_methods: settings.payment_methods ?? '',
     low_stock_threshold: String(settings.low_stock_threshold ?? 3),
     new_badge_days: String(settings.new_badge_days ?? 30),
+    show_low_stock_alert: settings.show_low_stock_alert ?? true,
   });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useNotice();
-  const bind = (k: keyof typeof s) => ({
+  const bind = (k: Exclude<keyof typeof s, 'show_low_stock_alert'>) => ({
     value: s[k],
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setS({ ...s, [k]: e.target.value }),
   });
@@ -77,6 +78,20 @@ export default function SettingsForm({ settings }: { settings: Record<string, an
         </Field>
       </Card>
       <Card title="Catálogo">
+        <label className="flex cursor-pointer items-center justify-between gap-4">
+          <span>
+            <span className="block text-sm font-medium">Mostrar avisos de “Últimas unidades”</span>
+            <span className="block text-xs text-muted">Apágalo para ocultarlos en las fichas y en las tarjetas de la tienda.</span>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            checked={s.show_low_stock_alert}
+            onChange={(e) => setS({ ...s, show_low_stock_alert: e.target.checked })}
+            className="peer sr-only"
+          />
+          <span aria-hidden className="relative h-6 w-11 shrink-0 rounded-full bg-outline transition-colors peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-surface after:transition-transform peer-checked:after:translate-x-5" />
+        </label>
         <Field label="Umbral de “Últimas unidades”">
           <input className={input} inputMode="numeric" {...bind('low_stock_threshold')} />
         </Field>

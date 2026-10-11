@@ -44,7 +44,7 @@ describe('variantInputSchema', () => {
 });
 
 describe('settingsInputSchema', () => {
-  const base = { store_name: 'Leyma', low_stock_threshold: 3, new_badge_days: 30 };
+  const base = { store_name: 'Leyma', low_stock_threshold: 3, show_low_stock_alert: true, new_badge_days: 30 };
   it('limpia el número de WhatsApp', () => {
     const s = settingsInputSchema.parse({ ...base, whatsapp_number: '+57 300 123 4567' });
     expect(s.whatsapp_number).toBe('573001234567');

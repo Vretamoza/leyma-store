@@ -3,7 +3,7 @@ import { categoryTreeIds, sortProducts, isNew } from '@leyma/core';
 import Base from '../layouts/Base.astro';
 import ProductGrid from '../components/ProductGrid.astro';
 import CategoryCarousel from '../components/CategoryCarousel.astro';
-import { loadCatalog } from '../lib/data';
+import { loadCatalog, lowStockLimit } from '../lib/data';
 
 export const prerender = false;
 
@@ -31,7 +31,7 @@ const tiles = roots
 const newest = sortProducts(products, 'novedades');
 const novedades = newest.filter((p) => isNew(p.created_at, settings.new_badge_days)).slice(0, 8);
 const destacados = products.filter((p) => p.is_featured).slice(0, 8);
-const common = { categories, kitSizes, lowStock: settings.low_stock_threshold, newDays: settings.new_badge_days };
+const common = { categories, kitSizes, lowStock: lowStockLimit(settings), newDays: settings.new_badge_days };
 
 const steps = [
   { title: 'Elige', text: 'Mira fotos, tonos y disponibilidad en cada ficha.' },

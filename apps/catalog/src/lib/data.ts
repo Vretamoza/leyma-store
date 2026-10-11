@@ -12,6 +12,7 @@ const SETTINGS_FALLBACK: StoreSettings = {
   shipping_info: null,
   payment_methods: null,
   low_stock_threshold: 3,
+  show_low_stock_alert: true,
   new_badge_days: 30,
 };
 
@@ -100,4 +101,9 @@ export async function loadProductExtras(
       .filter((f) => f.product_id === null || f.product_id === productId)
       .sort((a, b) => Number(a.product_id === null) - Number(b.product_id === null) || a.sort_order - b.sort_order),
   };
+}
+
+/** Umbral efectivo de "Últimas unidades": 0 cuando el aviso está apagado (nada cuenta como "poco stock"). */
+export function lowStockLimit(s: StoreSettings): number {
+  return s.show_low_stock_alert === false ? 0 : s.low_stock_threshold;
 }

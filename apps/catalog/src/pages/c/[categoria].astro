@@ -9,7 +9,7 @@ import {
 } from '@leyma/core';
 import Base from '../../layouts/Base.astro';
 import Listing from '../../components/Listing.astro';
-import { loadCatalog, loadPopularity } from '../../lib/data';
+import { loadCatalog, loadPopularity, lowStockLimit } from '../../lib/data';
 
 export const prerender = false;
 
@@ -50,7 +50,7 @@ const showUndertone = inCategory.some((p) => productUndertones(p).length > 0);
     products={visible}
     {categories}
     {kitSizes}
-    lowStock={settings.low_stock_threshold}
+    lowStock={lowStockLimit(settings)}
     newDays={settings.new_badge_days}
     {subcategories}
     {filters}

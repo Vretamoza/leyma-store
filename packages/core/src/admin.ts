@@ -109,6 +109,7 @@ export const settingsInputSchema = z.object({
   shipping_info: optText(600),
   payment_methods: optText(600),
   low_stock_threshold: z.coerce.number().int().min(0).max(1000),
+  show_low_stock_alert: z.boolean().default(true),
   new_badge_days: z.coerce.number().int().min(0).max(365),
 });
 export type SettingsInput = z.infer<typeof settingsInputSchema>;

@@ -81,6 +81,7 @@ export interface StoreSettings {
   shipping_info: string | null;
   payment_methods: string | null;
   low_stock_threshold: number;
+  show_low_stock_alert: boolean;
   new_badge_days: number;
 }
 
