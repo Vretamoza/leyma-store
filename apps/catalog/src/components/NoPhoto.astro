@@ -1,0 +1,8 @@
+---
+interface Props {
+  label?: string;
+}
+const { label = 'Foto próximamente' } = Astro.props;
+---
+
+<div class="flex h-full w-full items-center justify-center bg-ph px-2 text-center text-xs text-muted">{label}</div>

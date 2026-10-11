@@ -87,7 +87,7 @@ test('un producto agotado en la bolsa se marca y no entra al mensaje', async ({ 
   const ok = await page.getByRole('radio', { name: '03 Beige cálido' }).getAttribute('data-vid');
   const line = (variantId: string, variantName: string, unitPrice: number) => ({
     variantId, productId: 'x', slug: 'base-matte-glow', name: 'Base Matte Glow', variantLabel: 'Tono', variantName,
-    hex: '#8E5E41', image: null, art: 'bottle', unitPrice, quantity: 1,
+    hex: '#8E5E41', image: null, unitPrice, quantity: 1,
   });
   await page.evaluate(
     ([a, b]) => localStorage.setItem('leyma:bag', JSON.stringify([a, b])),

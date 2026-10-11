@@ -12,7 +12,6 @@ import Base from '../../layouts/Base.astro';
 import Accordion from '../../components/Accordion.astro';
 import ProductGrid from '../../components/ProductGrid.astro';
 import ProductView from '../../features/product/ProductView';
-import { artKind } from '../../lib/art';
 import { imageUrl, loadCatalog, loadProductExtras } from '../../lib/data';
 
 export const prerender = false;
@@ -84,7 +83,7 @@ const h2 = 'font-serif text-2xl font-semibold';
       <span aria-hidden="true">/</span><span class="text-ink">{product.name}</span>
     </nav>
 
-    <ProductView client:load {product} {initialKey} {eyebrow} art={artKind(product, categories)} {store}>
+    <ProductView client:load {product} {initialKey} {eyebrow} {store}>
       <div class="mt-7 border-t border-line">
         {extras.description && <Accordion title="Descripción" open><p class="whitespace-pre-line">{extras.description}</p></Accordion>}
         {rows.length > 0 && (

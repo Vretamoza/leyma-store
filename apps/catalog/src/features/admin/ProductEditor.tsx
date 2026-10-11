@@ -90,6 +90,8 @@ export default function ProductEditor({ product, categories, brands, types, supa
   );
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  /** variant_id al que van las fotos que se están eligiendo (null = generales). */
+  const uploadTarget = useRef<string | null>(null);
 
   const hasVariants = variants.length > 0;
   const hiddenOnly = variants.length === 1 && variants[0].name === 'Única';
@@ -161,6 +163,7 @@ export default function ProductEditor({ product, categories, brands, types, supa
 
   async function onFiles(files: FileList | null) {
     if (!files?.length || !product) return;
+    const variantId = uploadTarget.current;
     setUploading(true);
     const supabase = createBrowser();
     let next = images.length;
@@ -175,13 +178,13 @@ export default function ProductEditor({ product, categories, brands, types, supa
         });
         if (up.error) throw new Error(up.error.message);
         const r = await run(
-          actions.addImage({ product_id: product.id, variant_id: null, path, alt: null, sort_order: next }),
+          actions.addImage({ product_id: product.id, variant_id: variantId, path, alt: null, sort_order: next }),
         );
         if ('error' in r) {
           await supabase.storage.from('product-images').remove([path]);
           throw new Error(r.error);
         }
-        added.push({ id: r.data.id, path, alt: null, variant_id: null, sort_order: next++ });
+        added.push({ id: r.data.id, path, alt: null, variant_id: variantId, sort_order: next++ });
       }
       setNotice({ kind: 'ok', text: `${added.length} foto(s) subida(s)` });
     } catch (e) {
@@ -190,6 +193,11 @@ export default function ProductEditor({ product, categories, brands, types, supa
     setImages((all) => [...all, ...added]);
     setUploading(false);
     if (fileRef.current) fileRef.current.value = '';
+  }
+
+  function pickFiles(variantId: string | null) {
+    uploadTarget.current = variantId;
+    fileRef.current?.click();
   }
 
   async function saveImages() {
@@ -306,6 +314,25 @@ export default function ProductEditor({ product, categories, brands, types, supa
                     <button type="button" className={btnGhost} aria-label="Quitar variante" onClick={() => setVariants(variants.filter((x) => x.key !== v.key))}>Quitar</button>
                   </span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2 border-t border-line pt-2">
+                  {v.id ? (
+                    <>
+                      {images
+                        .filter((im) => im.variant_id === v.id)
+                        .map((im) => (
+                          <span key={im.id} className="relative h-16 w-12 overflow-hidden rounded-lg bg-ph">
+                            <img src={`${supabaseUrl}/storage/v1/object/public/product-images/${im.path}`} alt="" className="h-full w-full object-cover" loading="lazy" />
+                            <button type="button" aria-label="Quitar foto" className="absolute right-0 top-0 flex size-6 items-center justify-center rounded-bl-lg bg-surface/90 text-xs" onClick={() => removeImage(im)}>✕</button>
+                          </span>
+                        ))}
+                      <button type="button" className={btnGhost} disabled={uploading} onClick={() => pickFiles(v.id!)}>
+                        {uploading ? 'Subiendo…' : '+ Fotos de este ' + (label ? label.toLowerCase() : 'tono')}
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted">Guarda el producto para subir las fotos de esta variante.</span>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
@@ -321,10 +348,10 @@ export default function ProductEditor({ product, categories, brands, types, supa
       </Card>
 
       {!isNew && (
-        <Card title="Fotos">
+        <Card title="Todas las fotos">
           <p className="text-sm text-muted">Se comprimen a WebP automáticamente. Asigna cada foto a un {label ? label.toLowerCase() : 'tono'} o déjala general.</p>
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => onFiles(e.target.files)} />
-          <button type="button" className={btn} disabled={uploading} onClick={() => fileRef.current?.click()}>
+          <button type="button" className={btn} disabled={uploading} onClick={() => pickFiles(null)}>
             {uploading ? 'Subiendo…' : '+ Subir fotos'}
           </button>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">

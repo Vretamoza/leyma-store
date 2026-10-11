@@ -17,19 +17,16 @@ import {
   type Undertone,
   type Variant,
 } from '@leyma/core';
-import type { ArtKind } from '../../lib/art';
 import { imageUrl } from '../../lib/images';
 import { addToBag } from '../bag/store';
 import { sendOrder } from '../bag/order';
 import { Gallery, type Slide } from './Gallery';
-import { ProductArt } from './ProductArt';
 
 interface Props {
   product: Product;
   /** Valor de `?tono=` con el que se abrió la página. */
   initialKey: string | null;
   eyebrow: string;
-  art: ArtKind;
   store: { name: string; whatsapp: string; lowStock: number; newDays: number };
   /** Contenido de la columna derecha debajo de los botones (acordeones, envíos…). */
   children?: ReactNode;
@@ -42,7 +39,7 @@ const UNDERTONES: { value: Undertone; label: string }[] = [
 ];
 const SUBTONE_FILTER_FROM = 8;
 
-export default function ProductView({ product, initialKey, eyebrow, art, store, children }: Props) {
+export default function ProductView({ product, initialKey, eyebrow, store, children }: Props) {
   const [variants, setVariants] = useState<Variant[]>(product.product_variants);
   const [selectedId, setSelectedId] = useState<string | undefined>(() => pickVariant(product.product_variants, initialKey)?.id);
   const [undertone, setUndertone] = useState<Undertone | null>(null);
@@ -54,6 +51,14 @@ export default function ProductView({ product, initialKey, eyebrow, art, store, 
   const selected = sorted.find((v) => v.id === selectedId) ?? sorted[0];
   const label = product.variant_label;
   const showSelector = Boolean(label) && sorted.length > 0;
+
+  // Precarga las fotos de todos los tonos para que cambiar de tono sea instantáneo.
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      for (const img of product.product_images) new Image().src = imageUrl(img.path);
+    }, 600);
+    return () => window.clearTimeout(id);
+  }, [product.product_images]);
 
   // Stock y precio en vivo: el HTML puede venir de la caché de 5 minutos.
   useEffect(() => {
@@ -95,9 +100,8 @@ export default function ProductView({ product, initialKey, eyebrow, art, store, 
     const imgs = galleryImages(product.product_images, selected?.id ?? null);
     return imgs.map((i) => ({ id: i.id, src: imageUrl(i.path), alt: i.alt ?? `${product.name}${selected ? `, ${selected.name}` : ''}` }));
   }, [product, selected]);
-  const artHex = selected?.swatch_hex ?? '#D6AB84';
   const galleryLabel = label && selected ? `Fotos del ${label.toLowerCase()} ${selected.name}` : `Fotos de ${product.name}`;
-  const gallerySlides = slides.length ? slides : [{ id: 'art', alt: product.name }];
+  const gallerySlides = slides.length ? slides : [{ id: 'empty', alt: product.name }];
 
   const showFilter = sorted.length > SUBTONE_FILTER_FROM;
   const tones = showFilter ? UNDERTONES.filter((t) => sorted.some((v) => v.undertone === t.value)) : [];
@@ -123,7 +127,6 @@ export default function ProductView({ product, initialKey, eyebrow, art, store, 
       variantName: label ? selected.name : null,
       hex: selected.swatch_hex,
       image: photo?.path ?? null,
-      art,
       unitPrice: price,
     };
   }
@@ -178,7 +181,6 @@ export default function ProductView({ product, initialKey, eyebrow, art, store, 
           label={galleryLabel}
           resetKey={selected?.id ?? 'none'}
           badges={badges}
-          art={<ProductArt kind={art} hex={artHex} label={`${product.name}${selected ? `, ${selected.name}` : ''}`} />}
         />
       </div>
 

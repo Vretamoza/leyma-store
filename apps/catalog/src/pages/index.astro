@@ -2,7 +2,7 @@
 import { categoryTreeIds, sortProducts, isNew } from '@leyma/core';
 import Base from '../layouts/Base.astro';
 import ProductGrid from '../components/ProductGrid.astro';
-import Placeholder from '../components/Placeholder.astro';
+import NoPhoto from '../components/NoPhoto.astro';
 import { imageUrl, loadCatalog } from '../lib/data';
 
 export const prerender = false;
@@ -14,8 +14,6 @@ const countFor = (id: string) => {
   const ids = new Set(categoryTreeIds(categories, id));
   return products.filter((p) => p.category_id && ids.has(p.category_id)).length;
 };
-const kindFor = (slug: string) =>
-  ({ kits: 'kit', ropa: 'garment', 'accesorios-faciales': 'gems' } as const)[slug as 'kits'] ?? 'bottle';
 
 const newest = sortProducts(products, 'novedades');
 const novedades = newest.filter((p) => isNew(p.created_at, settings.new_badge_days)).slice(0, 8);
@@ -75,7 +73,7 @@ const h2 = 'font-serif text-[30px] font-semibold md:text-[44px]';
               {c.image_path ? (
                 <img src={imageUrl(c.image_path)} alt="" width="400" height="400" loading="lazy" class="h-full w-full object-cover" />
               ) : (
-                <Placeholder kind={kindFor(c.slug)} hex="#D6AB84" label={c.name} />
+                <NoPhoto label={c.name} />
               )}
             </div>
             <div class="flex items-center justify-between gap-2 px-3 pb-3.5 pt-3 md:px-[18px] md:py-4">

@@ -16,7 +16,6 @@ import {
   type LiveVariant,
 } from '@leyma/core';
 import { imageUrl } from '../../lib/images';
-import { ProductArt } from '../product/ProductArt';
 import { $bag, $customer, changeQuantity, removeFromBag } from './store';
 import { orderUrl, sendOrder } from './order';
 import { useBag } from './useBag';
@@ -173,7 +172,7 @@ export default function BagView({ store }: Props) {
                   {line.image ? (
                     <img src={imageUrl(line.image)} alt="" width={84} height={105} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
-                    <ProductArt kind={line.art} hex={line.hex ?? '#D6AB84'} label={line.name} />
+                    <span className="block h-full w-full bg-ph" aria-hidden="true" />
                   )}
                 </a>
                 <div className="flex min-w-0 flex-1 flex-col">

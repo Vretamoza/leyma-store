@@ -25,10 +25,9 @@ const base = {
   variantName: '03 Beige cálido',
   hex: '#D9AE86',
   image: null,
-  art: 'bottle' as const,
   unitPrice: 45000,
 };
-const kit = { ...base, variantId: 'v2', productId: 'p2', slug: 'kit', name: 'Kit Pepitas Doradas', variantLabel: null, variantName: null, hex: null, art: 'kit' as const, unitPrice: 18000 };
+const kit = { ...base, variantId: 'v2', productId: 'p2', slug: 'kit', name: 'Kit Pepitas Doradas', variantLabel: null, variantName: null, hex: null, unitPrice: 18000 };
 
 describe('agregar, cambiar y quitar', () => {
   it('agrega una línea nueva y suma a la existente', () => {

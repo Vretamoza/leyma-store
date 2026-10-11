@@ -2,8 +2,7 @@
 import type { Category, Product } from '@leyma/core';
 import { cardMeta, formatCOP, isNew, minPrice, productStatus, swatchPreview } from '@leyma/core';
 import { imageUrl } from '../lib/data';
-import Placeholder from './Placeholder.astro';
-import { artKind } from '../lib/art';
+import NoPhoto from './NoPhoto.astro';
 
 interface Props {
   product: Product;
@@ -27,8 +26,6 @@ const photo = [...product.product_images]
   .sort((a, b) => a.sort_order - b.sort_order)
   .find((i) => i.variant_id === null) ?? product.product_images[0];
 
-const kind = artKind(product, categories);
-const hex = colors[0] ?? '#D6AB84';
 ---
 
 <a href={`/p/${product.slug}`} class="block text-ink no-underline">
@@ -44,7 +41,7 @@ const hex = colors[0] ?? '#D6AB84';
         class="h-full w-full object-cover"
       />
     ) : (
-      <Placeholder kind={kind} hex={hex} label={product.name} />
+      <NoPhoto />
     )}
     {status === 'out' && <span class="absolute inset-0 bg-bg/45"></span>}
     {showNew && (

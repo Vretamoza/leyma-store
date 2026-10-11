@@ -2,21 +2,20 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 export interface Slide {
   id: string;
-  /** Sin `src` se muestra `art` (ilustración de respaldo). */
+  /** Sin `src` se muestra un recuadro neutro (el producto aún no tiene fotos). */
   src?: string;
   alt: string;
 }
 
 interface Props {
   slides: Slide[];
-  art: ReactNode;
   label: string;
   badges?: ReactNode;
   /** Cambia con el tono para reiniciar el carrusel y animar el cambio de foto. */
   resetKey: string;
 }
 
-export function Gallery({ slides, art, label, badges, resetKey }: Props) {
+export function Gallery({ slides, label, badges, resetKey }: Props) {
   const strip = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
@@ -80,7 +79,7 @@ export function Gallery({ slides, art, label, badges, resetKey }: Props) {
                   />
                 </button>
               ) : (
-                art
+                <div className="flex h-full w-full items-center justify-center bg-ph text-sm text-muted">Foto próximamente</div>
               )}
             </div>
           ))}

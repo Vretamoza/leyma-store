@@ -13,7 +13,6 @@ export const bagLineSchema = z.object({
   /** Ruta de la foto en el bucket, para mostrarla en la bolsa. */
   image: z.string().nullable().default(null),
   /** Ilustración de respaldo mientras no hay foto. */
-  art: z.enum(['bottle', 'lip', 'kit', 'compact', 'garment', 'gems']).default('compact'),
   unitPrice: z.number().nonnegative(),
   quantity: z.number().int().positive(),
 });
