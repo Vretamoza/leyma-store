@@ -1,0 +1,63 @@
+---
+import NoPhoto from './NoPhoto.astro';
+import { imageUrl } from '../lib/images';
+
+interface Props {
+  images: { path: string; alt?: string | null }[];
+  label: string;
+  /** Segundos que se ve cada foto. */
+  hold?: number;
+  /** Segundos que dura el fundido entre fotos. */
+  fade?: number;
+}
+const { images, label, hold = 3.5, fade = 1.2 } = Astro.props;
+const n = images.length;
+const total = n * hold;
+const fadePct = +((fade / total) * 100).toFixed(3);
+const holdPct = +(100 / n).toFixed(3);
+const name = `cat-fade-${n}`;
+---
+
+{
+  n === 0 ? (
+    <NoPhoto label={label} />
+  ) : n === 1 ? (
+    <img src={imageUrl(images[0].path)} alt="" width="400" height="400" loading="lazy" class="h-full w-full object-cover" />
+  ) : (
+    <div class="cat-carousel relative h-full w-full" style={`--cat-total:${total}s`}>
+      {images.map((img, i) => (
+        <img
+          src={imageUrl(img.path)}
+          alt=""
+          width="400"
+          height="400"
+          loading={i === 0 ? 'eager' : 'lazy'}
+          class="cat-slide absolute inset-0 h-full w-full object-cover"
+          style={`animation-name:${name};animation-delay:${(i * hold - fade).toFixed(2)}s`}
+        />
+      ))}
+      <style
+        is:global
+        set:html={`@keyframes ${name}{0%{opacity:0}${fadePct}%{opacity:1}${holdPct}%{opacity:1}${+(holdPct + fadePct).toFixed(3)}%{opacity:0}100%{opacity:0}}`}
+      />
+    </div>
+  )
+}
+
+<style is:global>
+  .cat-slide {
+    opacity: 0;
+    animation-duration: var(--cat-total);
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cat-slide {
+      animation: none !important;
+    }
+    .cat-slide:first-child {
+      opacity: 1;
+    }
+  }
+</style>

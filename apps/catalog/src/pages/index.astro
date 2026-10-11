@@ -2,18 +2,31 @@
 import { categoryTreeIds, sortProducts, isNew } from '@leyma/core';
 import Base from '../layouts/Base.astro';
 import ProductGrid from '../components/ProductGrid.astro';
-import NoPhoto from '../components/NoPhoto.astro';
-import { imageUrl, loadCatalog } from '../lib/data';
+import CategoryCarousel from '../components/CategoryCarousel.astro';
+import { loadCatalog } from '../lib/data';
 
 export const prerender = false;
 
 const { categories, products, kitSizes, settings } = await loadCatalog();
 const roots = categories.filter((c) => !c.parent_id);
 
-const countFor = (id: string) => {
+const productsIn = (id: string) => {
   const ids = new Set(categoryTreeIds(categories, id));
-  return products.filter((p) => p.category_id && ids.has(p.category_id)).length;
+  return products.filter((p) => p.category_id && ids.has(p.category_id));
 };
+
+// Solo categorías con productos; la miniatura rota entre la foto principal de cada producto.
+const MAX_SLIDES = 8;
+const tiles = roots
+  .map((c) => {
+    const inCat = productsIn(c.id);
+    const images = inCat
+      .map((p) => [...p.product_images].sort((a, b) => a.sort_order - b.sort_order)[0])
+      .filter(Boolean)
+      .slice(0, MAX_SLIDES);
+    return { category: c, count: inCat.length, images };
+  })
+  .filter((t) => t.count > 0);
 
 const newest = sortProducts(products, 'novedades');
 const novedades = newest.filter((p) => isNew(p.created_at, settings.new_badge_days)).slice(0, 8);
@@ -67,18 +80,14 @@ const h2 = 'font-serif text-[30px] font-semibold md:text-[44px]';
     <section aria-labelledby="cat-h" class="pt-11 md:pt-24">
       <h2 id="cat-h" class:list={[h2, 'mb-4 md:mb-6']}>Categorías</h2>
       <div class="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-6">
-        {roots.map((c) => (
+        {tiles.map(({ category: c, count, images }) => (
           <a href={`/c/${c.slug}`} class="overflow-hidden rounded-xl border border-line bg-surface text-ink no-underline">
-            <div class="aspect-square bg-ph">
-              {c.image_path ? (
-                <img src={imageUrl(c.image_path)} alt="" width="400" height="400" loading="lazy" class="h-full w-full object-cover" />
-              ) : (
-                <NoPhoto label={c.name} />
-              )}
+            <div class="aspect-square overflow-hidden bg-ph">
+              <CategoryCarousel images={images} label={c.name} />
             </div>
             <div class="flex items-center justify-between gap-2 px-3 pb-3.5 pt-3 md:px-[18px] md:py-4">
               <span class="text-[15px] font-medium md:text-[17px]">{c.name}</span>
-              <span class="hidden text-[13px] text-muted md:inline">{countFor(c.id)} {countFor(c.id) === 1 ? 'producto' : 'productos'}</span>
+              <span class="hidden text-[13px] text-muted md:inline">{count} {count === 1 ? 'producto' : 'productos'}</span>
               <svg class="md:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A55A6D" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
             </div>
           </a>
