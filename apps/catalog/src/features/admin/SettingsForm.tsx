@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { actions } from 'astro:actions';
-import { btn, Card, Field, input, NoticeBar, run, useNotice } from './ui';
+import { Button, Card, Field, input, NoticeBar, run, useNotice } from './ui';
 
 export default function SettingsForm({ settings }: { settings: Record<string, any> }) {
   const [s, setS] = useState({
@@ -86,9 +86,9 @@ export default function SettingsForm({ settings }: { settings: Record<string, an
       </Card>
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg px-4 py-3">
         <div className="mx-auto max-w-4xl">
-          <button className={`${btn} w-full`} disabled={busy} onClick={save}>
-            {busy ? 'Guardando…' : 'Guardar ajustes'}
-          </button>
+          <Button className="w-full" busy={busy} busyText="Guardando…" onClick={save}>
+            Guardar ajustes
+          </Button>
         </div>
       </div>
       <NoticeBar notice={notice} />

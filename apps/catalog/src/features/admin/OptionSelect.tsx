@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { actions } from 'astro:actions';
-import { btn, btnGhost, input, run } from './ui';
+import { Button, btnGhost, input, run } from './ui';
 
 export interface Option {
   id: string;
@@ -67,9 +67,9 @@ export default function OptionSelect(props: {
           </select>
         )}
         <div className="flex gap-2">
-          <button type="button" className={btn} disabled={busy} onClick={add}>
+          <Button busy={busy} busyText="Agregando…" onClick={add}>
             Agregar
-          </button>
+          </Button>
           <button type="button" className={btnGhost} onClick={() => setAdding(false)}>
             Cancelar
           </button>

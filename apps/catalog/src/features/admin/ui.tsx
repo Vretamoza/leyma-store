@@ -2,10 +2,70 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 export const input =
   'w-full rounded-xl border border-outline bg-surface px-3 py-3 text-base text-ink placeholder:text-muted';
-export const btn =
-  'inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-surface disabled:opacity-50';
-export const btnGhost =
-  'inline-flex min-h-11 items-center justify-center rounded-full border border-outline px-5 py-2 text-sm text-ink disabled:opacity-50';
+const base =
+  'inline-flex min-h-11 select-none items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+export const btn = `${base} bg-primary text-surface hover:bg-primary-dark active:bg-primary-dark`;
+export const btnGhost = `${base} border border-outline bg-transparent text-ink hover:bg-tint active:bg-line`;
+
+export function Spinner() {
+  return (
+    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * Botón con estado de carga automático: si `onClick` devuelve una promesa, se deshabilita
+ * y muestra un spinner hasta que termine. `busy` fuerza el estado desde afuera.
+ */
+export function Button({
+  variant = 'primary',
+  onClick,
+  busy = false,
+  busyText,
+  className = '',
+  children,
+  ...rest
+}: {
+  variant?: 'primary' | 'ghost';
+  onClick?: () => void | Promise<unknown>;
+  busy?: boolean;
+  busyText?: ReactNode;
+  className?: string;
+  children: ReactNode;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick' | 'className' | 'children'>) {
+  const [pending, setPending] = useState(false);
+  const loading = busy || pending;
+
+  async function handle() {
+    if (loading || !onClick) return;
+    const r = onClick();
+    if (r && typeof (r as Promise<unknown>).then === 'function') {
+      setPending(true);
+      try {
+        await r;
+      } finally {
+        setPending(false);
+      }
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      {...rest}
+      aria-busy={loading || undefined}
+      disabled={rest.disabled || loading}
+      onClick={handle}
+      className={`${variant === 'primary' ? btn : btnGhost} ${className}`}
+    >
+      {loading && <Spinner />}
+      {loading && busyText ? busyText : children}
+    </button>
+  );
+}
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (

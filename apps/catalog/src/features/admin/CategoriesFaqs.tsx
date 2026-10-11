@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { actions } from 'astro:actions';
 import OptionsManager from './OptionsManager';
 import type { Option } from './OptionSelect';
-import { btn, btnGhost, Card, Field, input, NoticeBar, run, useNotice } from './ui';
+import { Button, btnGhost, Card, Field, input, NoticeBar, run, useNotice } from './ui';
 
 interface Cat {
   id?: string;
@@ -83,8 +83,8 @@ export default function CategoriesFaqs(props: { categories: Cat[]; faqs: Faq[]; 
                 <input type="checkbox" checked={c.is_active} onChange={(e) => patchCat(c, { is_active: e.target.checked })} /> Visible
               </label>
               <span className="ml-auto flex gap-1">
-                <button className={btn} onClick={() => saveCat(c)}>Guardar</button>
-                <button className={btnGhost} onClick={() => delCat(c)}>Eliminar</button>
+                <Button onClick={() => saveCat(c)} busyText="Guardando…">Guardar</Button>
+                <Button variant="ghost" onClick={() => delCat(c)}>Eliminar</Button>
               </span>
             </div>
           </div>
@@ -112,8 +112,8 @@ export default function CategoriesFaqs(props: { categories: Cat[]; faqs: Faq[]; 
                 <input type="checkbox" checked={f.is_active} onChange={(e) => patchFaq(f, { is_active: e.target.checked })} /> Visible
               </label>
               <span className="ml-auto flex gap-1">
-                <button className={btn} onClick={() => saveFaq(f)}>Guardar</button>
-                <button className={btnGhost} onClick={() => delFaq(f)}>Eliminar</button>
+                <Button onClick={() => saveFaq(f)} busyText="Guardando…">Guardar</Button>
+                <Button variant="ghost" onClick={() => delFaq(f)}>Eliminar</Button>
               </span>
             </div>
           </div>

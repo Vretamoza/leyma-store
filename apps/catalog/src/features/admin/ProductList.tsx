@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { actions } from 'astro:actions';
 import { formatCOP, normalize } from '@leyma/core';
-import { btn, btnGhost, input, NoticeBar, run, useNotice } from './ui';
+import { Button, btn, input, NoticeBar, run, useNotice } from './ui';
 
 interface Row {
   id: string;
@@ -41,6 +41,7 @@ export default function ProductList(props: {
     const res = await run(actions.setProductActive({ id: r.id, is_active: !r.is_active }));
     if ('error' in res) return setNotice({ kind: 'error', text: res.error });
     setRows((all) => all.map((x) => (x.id === r.id ? { ...x, is_active: !r.is_active } : x)));
+    setNotice({ kind: 'ok', text: r.is_active ? `“${r.name}” ahora está oculto` : `“${r.name}” ya está publicado` });
   }
 
   async function duplicate(r: Row) {
@@ -81,8 +82,8 @@ export default function ProductList(props: {
               </span>
             </a>
             <div className="flex flex-col gap-1 sm:flex-row">
-              <button className={btnGhost} onClick={() => toggle(r)}>{r.is_active ? 'Ocultar' : 'Publicar'}</button>
-              <button className={btnGhost} onClick={() => duplicate(r)}>Duplicar</button>
+              <Button variant="ghost" onClick={() => toggle(r)}>{r.is_active ? 'Ocultar' : 'Publicar'}</Button>
+              <Button variant="ghost" onClick={() => duplicate(r)} busyText="Duplicando…">Duplicar</Button>
             </div>
           </li>
         ))}

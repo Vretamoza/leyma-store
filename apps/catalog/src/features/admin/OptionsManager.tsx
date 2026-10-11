@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { actions } from 'astro:actions';
-import { btn, btnGhost, Card, input, run } from './ui';
+import { Button, Card, input, run } from './ui';
 import type { Option } from './OptionSelect';
 
 export default function OptionsManager(props: {
@@ -32,8 +32,8 @@ export default function OptionsManager(props: {
             value={o.name}
             onChange={(e) => setRows(rows.map((r) => (r.id === o.id ? { ...r, name: e.target.value } : r)))}
           />
-          <button className={btn} onClick={() => rename(o)}>Guardar</button>
-          <button className={btnGhost} onClick={() => remove(o)}>Eliminar</button>
+          <Button onClick={() => rename(o)} busyText="Guardando…">Guardar</Button>
+          <Button variant="ghost" onClick={() => remove(o)}>Eliminar</Button>
         </div>
       ))}
       {!rows.length && <p className="text-sm text-muted">Aún no hay ninguna. Se crean desde el formulario del producto.</p>}

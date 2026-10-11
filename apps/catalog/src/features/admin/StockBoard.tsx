@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { actions } from 'astro:actions';
 import { normalize } from '@leyma/core';
-import { btn, btnGhost, input, NoticeBar, run, useNotice } from './ui';
+import { Button, btnGhost, input, NoticeBar, run, useNotice } from './ui';
 
 interface Row {
   id: string;
@@ -97,12 +97,12 @@ export default function StockBoard({ rows, threshold }: { rows: Row[]; threshold
       {dirty.length > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg px-4 py-3">
           <div className="mx-auto flex max-w-4xl gap-2">
-            <button className={`${btn} flex-1`} disabled={busy} onClick={save}>
-              {busy ? 'Guardando…' : `Guardar ${dirty.length} cambio(s)`}
-            </button>
-            <button className={btnGhost} onClick={() => setStock(saved)}>
+            <Button className="flex-1" busy={busy} busyText="Guardando…" onClick={save}>
+              {`Guardar ${dirty.length} cambio(s)`}
+            </Button>
+            <Button variant="ghost" disabled={busy} onClick={() => setStock(saved)}>
               Descartar
-            </button>
+            </Button>
           </div>
         </div>
       )}

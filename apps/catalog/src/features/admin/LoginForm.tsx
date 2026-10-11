@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { actions } from 'astro:actions';
-import { btn, Field, input, run } from './ui';
+import { Button, Field, input, run } from './ui';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
@@ -31,7 +31,7 @@ export default function LoginForm() {
         <input className={input} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
       </Field>
       {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
-      <button className={`${btn} w-full`} disabled={busy}>{busy ? 'Entrando…' : 'Entrar'}</button>
+      <Button type="submit" className="w-full" busy={busy} busyText="Entrando…">Entrar</Button>
     </form>
   );
 }

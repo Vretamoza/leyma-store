@@ -3,7 +3,7 @@ import { actions } from 'astro:actions';
 import { createBrowser } from '../../lib/supabase';
 import { compressImage } from './compress';
 import OptionSelect, { type Option } from './OptionSelect';
-import { btn, btnGhost, Card, Field, input, NoticeBar, run, useNotice } from './ui';
+import { Button, btnGhost, Card, Field, input, NoticeBar, run, useNotice } from './ui';
 
 interface VariantRow {
   key: string;
@@ -322,12 +322,12 @@ export default function ProductEditor({ product, categories, brands, types, supa
                         .map((im) => (
                           <span key={im.id} className="relative h-16 w-12 overflow-hidden rounded-lg bg-ph">
                             <img src={`${supabaseUrl}/storage/v1/object/public/product-images/${im.path}`} alt="" className="h-full w-full object-cover" loading="lazy" />
-                            <button type="button" aria-label="Quitar foto" className="absolute right-0 top-0 flex size-6 items-center justify-center rounded-bl-lg bg-surface/90 text-xs" onClick={() => removeImage(im)}>✕</button>
+                            <button type="button" aria-label="Quitar foto" className="absolute right-0 top-0 flex size-7 items-center justify-center rounded-bl-lg bg-surface/90 text-xs transition hover:bg-tint active:bg-line" onClick={() => removeImage(im)}>✕</button>
                           </span>
                         ))}
-                      <button type="button" className={btnGhost} disabled={uploading} onClick={() => pickFiles(v.id!)}>
-                        {uploading ? 'Subiendo…' : '+ Fotos de este ' + (label ? label.toLowerCase() : 'tono')}
-                      </button>
+                      <Button variant="ghost" busy={uploading} busyText="Subiendo…" onClick={() => pickFiles(v.id!)}>
+                        {'+ Fotos de este ' + (label ? label.toLowerCase() : 'tono')}
+                      </Button>
                     </>
                   ) : (
                     <span className="text-sm text-muted">Guarda el producto para subir las fotos de esta variante.</span>
@@ -351,9 +351,9 @@ export default function ProductEditor({ product, categories, brands, types, supa
         <Card title="Todas las fotos">
           <p className="text-sm text-muted">Se comprimen a WebP automáticamente. Asigna cada foto a un {label ? label.toLowerCase() : 'tono'} o déjala general.</p>
           <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => onFiles(e.target.files)} />
-          <button type="button" className={btn} disabled={uploading} onClick={() => pickFiles(null)}>
-            {uploading ? 'Subiendo…' : '+ Subir fotos'}
-          </button>
+          <Button busy={uploading} busyText="Subiendo…" onClick={() => pickFiles(null)}>
+            + Subir fotos
+          </Button>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {images.map((im, i) => (
               <li key={im.id} className="space-y-2 rounded-xl border border-line p-2">
@@ -370,12 +370,12 @@ export default function ProductEditor({ product, categories, brands, types, supa
                 <div className="flex gap-1">
                   <button type="button" className={`${btnGhost} flex-1`} aria-label="Mover antes" onClick={() => setImages(move(images, i, -1))}>←</button>
                   <button type="button" className={`${btnGhost} flex-1`} aria-label="Mover después" onClick={() => setImages(move(images, i, 1))}>→</button>
-                  <button type="button" className={`${btnGhost} flex-1`} aria-label="Eliminar foto" onClick={() => removeImage(im)}>✕</button>
+                  <Button variant="ghost" className="flex-1" aria-label="Eliminar foto" onClick={() => removeImage(im)}>✕</Button>
                 </div>
               </li>
             ))}
           </ul>
-          {images.length > 0 && <button type="button" className={btn} onClick={saveImages}>Guardar orden y asignaciones</button>}
+          {images.length > 0 && <Button busyText="Guardando…" onClick={saveImages}>Guardar orden y asignaciones</Button>}
           {hasVariants && namedVariants.length < variants.length && (
             <p className="text-sm text-muted">Guarda el producto para poder asignar fotos a las variantes nuevas.</p>
           )}
@@ -385,8 +385,8 @@ export default function ProductEditor({ product, categories, brands, types, supa
 
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg px-4 py-3">
         <div className="mx-auto flex max-w-4xl gap-2">
-          <button className={`${btn} flex-1`} disabled={busy} onClick={save}>{busy ? 'Guardando…' : 'Guardar'}</button>
-          {!isNew && <button className={btnGhost} onClick={remove}>Eliminar</button>}
+          <Button className="flex-1" busy={busy} busyText="Guardando…" onClick={save}>Guardar</Button>
+          {!isNew && <Button variant="ghost" disabled={busy} onClick={remove}>Eliminar</Button>}
         </div>
       </div>
       <NoticeBar notice={notice} />
