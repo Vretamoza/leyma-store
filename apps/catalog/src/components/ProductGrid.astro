@@ -1,0 +1,20 @@
+---
+import type { Category, Product } from '@leyma/core';
+import ProductCard from './ProductCard.astro';
+
+interface Props {
+  products: Product[];
+  categories: Category[];
+  kitSizes: Record<string, number>;
+  lowStock: number;
+  newDays: number;
+  class?: string;
+}
+const { products, categories, kitSizes, lowStock, newDays, class: className } = Astro.props;
+---
+
+<div class:list={['grid grid-cols-2 gap-x-3 gap-y-7 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-x-5 md:gap-y-9', className]}>
+  {products.map((p, i) => (
+    <ProductCard product={p} categories={categories} kitSize={kitSizes[p.id] ?? 0} lowStock={lowStock} newDays={newDays} eager={i < 4} />
+  ))}
+</div>

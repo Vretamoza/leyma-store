@@ -1,0 +1,109 @@
+---
+import type { CatalogFilters, SortKey } from '@leyma/core';
+
+interface Props {
+  action: string;
+  idPrefix: string;
+  subcategories: { name: string; slug: string; count: number }[];
+  filters: CatalogFilters;
+  sort: SortKey;
+  /** El subtono solo aplica si algún producto del listado lo usa. */
+  showUndertone: boolean;
+  /** `sheet` = contenido del drawer móvil; `sidebar` = columna de escritorio. */
+  variant: 'sheet' | 'sidebar';
+  query?: string;
+}
+const { action, idPrefix, subcategories, filters, sort, showUndertone, variant, query } = Astro.props;
+
+const sorts: { key: SortKey; label: string }[] = [
+  { key: 'novedades', label: 'Novedades' },
+  { key: 'menor', label: 'Menor precio' },
+  { key: 'mayor', label: 'Mayor precio' },
+  { key: 'pedidos', label: 'Más pedidos' },
+];
+const tones = [
+  { value: 'frío', label: 'Frío' },
+  { value: 'cálido', label: 'Cálido' },
+  { value: 'neutro', label: 'Neutro' },
+];
+const chip = 'inline-flex h-9 cursor-pointer items-center rounded-full border border-line bg-surface px-3.5 text-[13px] has-[:checked]:border-secondary has-[:checked]:bg-tint has-[:checked]:font-semibold';
+const legend = 'mb-3 p-0 text-sm font-semibold';
+const group = 'm-0 border-0 border-b border-line px-0 py-[18px]';
+const field = 'mt-1 block h-11 w-full rounded-[10px] border border-outline bg-surface px-3.5 text-[15px]';
+---
+
+<form method="get" action={action} id={`${idPrefix}-form`} data-autosubmit={variant === 'sidebar' ? '' : undefined} class="flex min-h-0 flex-1 flex-col">
+  {query !== undefined && <input type="hidden" name="q" value={query} />}
+  <div class:list={['min-h-0 flex-1', variant === 'sheet' && 'overflow-auto px-5 pb-5 pt-1']}>
+    {variant === 'sheet' && (
+      <fieldset class={group}>
+        <legend class={legend}>Ordenar por</legend>
+        <div class="flex flex-wrap gap-2">
+          {sorts.map((s) => (
+            <label class={chip}><input type="radio" name="orden" value={s.key} checked={sort === s.key} class="sr-only" />{s.label}</label>
+          ))}
+        </div>
+      </fieldset>
+    )}
+
+    {subcategories.length > 0 && (
+      <fieldset class={group}>
+        <legend class={legend}>Subcategoría</legend>
+        {variant === 'sheet' ? (
+          <div class="flex flex-wrap gap-2">
+            {subcategories.map((s) => (
+              <label class={chip}><input type="checkbox" name="sub" value={s.slug} checked={filters.subcategories.includes(s.slug)} class="sr-only" />{s.name}</label>
+            ))}
+          </div>
+        ) : (
+          subcategories.map((s) => (
+            <label class="flex min-h-9 items-center gap-2.5 text-sm">
+              <input type="checkbox" name="sub" value={s.slug} checked={filters.subcategories.includes(s.slug)} class="size-[18px] accent-primary" />
+              {s.name}<span class="ml-auto text-[13px] text-muted">{s.count}</span>
+            </label>
+          ))
+        )}
+      </fieldset>
+    )}
+
+    <fieldset class={group}>
+      <legend class={legend}>Rango de precio</legend>
+      <div class="flex gap-3">
+        <label class="flex-1 text-xs text-muted">Mínimo
+          <input name="min" inputmode="numeric" placeholder="$0" value={filters.minPrice ?? ''} class={field} />
+        </label>
+        <label class="flex-1 text-xs text-muted">Máximo
+          <input name="max" inputmode="numeric" placeholder="Sin límite" value={filters.maxPrice ?? ''} class={field} />
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class={[group, !showUndertone && 'border-b-0'].join(' ')}>
+      <legend class={legend}>Disponibilidad</legend>
+      <label class="flex min-h-11 items-center justify-between gap-3 text-sm">
+        Solo productos disponibles
+        <input type="checkbox" name="disponible" value="1" checked={filters.onlyAvailable} class="size-[18px] accent-primary" />
+      </label>
+    </fieldset>
+
+    {showUndertone && (
+      <fieldset class="m-0 border-0 px-0 pb-1 pt-[18px]">
+        <legend class={legend}>Subtono</legend>
+        <div class="flex flex-wrap gap-2">
+          {tones.map((t) => (
+            <label class={chip}><input type="checkbox" name="subtono" value={t.value} checked={filters.undertones.includes(t.value as never)} class="sr-only" />{t.label}</label>
+          ))}
+        </div>
+      </fieldset>
+    )}
+  </div>
+
+  {variant === 'sheet' ? (
+    <div class="flex gap-2.5 border-t border-line bg-surface px-5 pb-4 pt-3">
+      <a href={action + (query ? `?q=${encodeURIComponent(query)}` : '')} class="flex h-[50px] items-center rounded-full border border-outline bg-surface px-5 text-[15px] font-medium text-ink no-underline">Limpiar</a>
+      <button type="submit" class="h-[50px] flex-1 cursor-pointer rounded-full bg-primary text-[15px] font-semibold text-bg hover:bg-primary-dark">Aplicar filtros</button>
+    </div>
+  ) : (
+    <noscript><button type="submit" class="mt-3 h-11 rounded-full bg-primary px-5 text-sm font-semibold text-bg">Aplicar</button></noscript>
+  )}
+</form>

@@ -1,0 +1,10 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import SettingsForm from '../../features/admin/SettingsForm';
+
+const { data } = await Astro.locals.supabase!.from('store_settings').select('*').maybeSingle();
+---
+
+<Admin title="Ajustes" current="ajustes">
+  <SettingsForm client:load settings={data ?? {}} />
+</Admin>

@@ -1,0 +1,20 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import StockBoard from '../../features/admin/StockBoard';
+
+const supabase = Astro.locals.supabase!;
+const [vars, settings] = await Promise.all([
+  supabase.from('product_variants').select('id, name, stock, products(name)').order('name'),
+  supabase.from('store_settings').select('low_stock_threshold').maybeSingle(),
+]);
+const rows = (vars.data ?? [])
+  .map((v) => {
+    const p = v.products as unknown as { name: string } | null;
+    return { id: v.id as string, product: p?.name ?? '', variant: v.name as string, stock: v.stock as number };
+  })
+  .sort((a, b) => a.product.localeCompare(b.product, 'es') || a.variant.localeCompare(b.variant, 'es'));
+---
+
+<Admin title="Stock rápido" current="stock">
+  <StockBoard client:load rows={rows} threshold={settings.data?.low_stock_threshold ?? 3} />
+</Admin>

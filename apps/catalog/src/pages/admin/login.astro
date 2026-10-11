@@ -1,0 +1,10 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import LoginForm from '../../features/admin/LoginForm';
+
+if (Astro.locals.userId) return Astro.redirect('/admin/productos');
+---
+
+<Admin title="Entrar" bare>
+  <LoginForm client:load />
+</Admin>

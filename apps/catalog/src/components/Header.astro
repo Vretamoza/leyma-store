@@ -1,0 +1,63 @@
+---
+import type { Category } from '@leyma/core';
+import BagBadge from '../features/bag/BagBadge';
+
+interface Props {
+  categories: Category[];
+  current?: string;
+  query?: string;
+}
+const { categories, current, query = '' } = Astro.props;
+const roots = categories.filter((c) => !c.parent_id);
+---
+
+<div class="hidden bg-primary px-4 py-[9px] text-center text-[13px] text-bg md:block">
+  Envíos a toda Colombia · Arma tu bolsa y envía el pedido por WhatsApp
+</div>
+<header class="relative border-b border-line">
+  <div class="mx-auto flex min-h-[60px] max-w-[1280px] items-center justify-between gap-4 px-3 md:min-h-[76px] md:px-8">
+    <!-- Menú móvil: <details>, sin JavaScript -->
+    <details class="group md:hidden">
+      <summary aria-label="Abrir menú" class="flex size-11 cursor-pointer list-none items-center justify-center [&::-webkit-details-marker]:hidden">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
+      </summary>
+      <nav aria-label="Categorías" class="absolute inset-x-0 top-full z-30 flex flex-col border-b border-line bg-bg px-4 py-2 shadow-sm">
+        {roots.map((c) => (
+          <a href={`/c/${c.slug}`} class="flex min-h-11 items-center text-[15px] text-ink no-underline">{c.name}</a>
+        ))}
+        <a href="/info" class="flex min-h-11 items-center text-[15px] text-ink no-underline">Envíos y pagos</a>
+      </nav>
+    </details>
+
+    <a href="/" class="flex flex-col items-center leading-none text-ink no-underline md:flex-row md:items-baseline md:gap-2" aria-label="Leyma Shop, inicio">
+      <span class="font-serif text-[28px] font-semibold md:text-[34px]">Leyma</span>
+      <span class="mt-0.5 text-[9px] tracking-[4px] text-muted md:mt-0 md:text-[10px]">SHOP</span>
+    </a>
+
+    <nav aria-label="Categorías" class="hidden flex-wrap gap-7 text-[15px] md:flex">
+      {roots.map((c) => (
+        <a
+          href={`/c/${c.slug}`}
+          aria-current={current === c.slug ? 'page' : undefined}
+          class:list={['text-ink no-underline', current === c.slug && 'border-b border-ink pb-0.5']}
+        >{c.name}</a>
+      ))}
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <form action="/buscar" role="search" class="relative hidden md:block">
+        <label for="q-desktop" class="sr-only">Buscar productos</label>
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" width="18" height="18" viewBox="0 0 24 24" {...{ fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round' }} aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+        <input id="q-desktop" name="q" value={query} placeholder="Buscar productos" class="h-10 w-[220px] rounded-full border border-outline bg-surface pl-10 pr-3.5 text-sm" />
+      </form>
+      <a href="/buscar" aria-label="Buscar" class="flex size-11 items-center justify-center text-ink md:hidden">
+        <svg width="21" height="21" viewBox="0 0 24 24" {...{ fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linecap': 'round' }} aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+      </a>
+      <a href="/bolsa" aria-label="Bolsa" class="relative flex size-11 items-center justify-center gap-2 text-ink no-underline md:h-11 md:w-auto md:rounded-full md:border md:border-ink md:px-4 md:text-sm md:font-medium">
+        <svg width="22" height="22" viewBox="0 0 24 24" {...{ fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }} aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8V6.5a3 3 0 0 1 6 0V8"></path></svg>
+        <span class="hidden md:inline">Bolsa</span>
+        <BagBadge client:only="react" />
+      </a>
+    </div>
+  </div>
+</header>

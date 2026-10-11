@@ -1,0 +1,31 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import ProductList from '../../../features/admin/ProductList';
+
+const supabase = Astro.locals.supabase!;
+const [prods, cats] = await Promise.all([
+  supabase
+    .from('products')
+    .select('id, name, slug, brands(name), category_id, base_price, is_active, product_variants(stock), product_images(path, variant_id, sort_order)')
+    .order('created_at', { ascending: false }),
+  supabase.from('categories').select('id, name').order('sort_order'),
+]);
+const products = (prods.data ?? []).map((p) => ({
+  id: p.id as string,
+  name: p.name as string,
+  slug: p.slug as string,
+  brand: (p.brands as unknown as { name: string } | null)?.name ?? null,
+  category_id: p.category_id as string | null,
+  base_price: Number(p.base_price),
+  is_active: p.is_active as boolean,
+  stock: (p.product_variants as { stock: number }[]).reduce((n, v) => n + v.stock, 0),
+  photo:
+    ((p.product_images as { path: string; variant_id: string | null; sort_order: number }[])
+      .filter((i) => i.variant_id === null)
+      .sort((a, b) => a.sort_order - b.sort_order)[0]?.path) ?? null,
+}));
+---
+
+<Admin title="Productos" current="productos">
+  <ProductList client:load products={products} categories={cats.data ?? []} supabaseUrl={import.meta.env.PUBLIC_SUPABASE_URL} />
+</Admin>

@@ -1,0 +1,93 @@
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/latin-500-italic.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/dm-sans/latin-400.css';
+@import '@fontsource/dm-sans/latin-500.css';
+@import '@fontsource/dm-sans/latin-600.css';
+@import 'tailwindcss';
+
+@theme {
+  /* Navy + crema + slate; el oro solo en detalles pequeños. */
+  --color-bg: #f8f4ef; /* crema cálido: fondo principal */
+  --color-surface: #fcfaf6; /* tarjetas e inputs (nunca blanco puro) */
+  --color-primary: #25344f; /* navy: botones, menú, títulos */
+  --color-primary-dark: #1a2640; /* hover del navy */
+  --color-secondary: #617891; /* slate blue: iconos, líneas, hover, estados */
+  --color-ink: #25344f; /* texto oscuro */
+  --color-muted: #4f6479; /* slate más oscuro para texto pequeño (contraste AA) */
+  --color-outline: #617891; /* bordes de botones y campos */
+  --color-line: #d8dee4; /* líneas sutiles */
+  --color-tint: #e6eaef; /* relleno suave de chips y selecciones */
+  --color-ph: #eee8df; /* fondo de fotos y placeholders */
+  --color-gold: #c9a96e; /* oro champán */
+  --color-gold-ink: #7f6528; /* oro legible como texto */
+  --color-gold-tint: #f1e7d0; /* relleno suave dorado (últimas unidades) */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@keyframes sk {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+.sk {
+  background: linear-gradient(100deg, #eee8df 30%, #f5f0e8 50%, #eee8df 70%);
+  background-size: 300% 100%;
+  animation: sk 1.4s ease-in-out infinite;
+}
+
+@keyframes bag-bump {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+}
+.bag-bump { animation: bag-bump 350ms ease; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast-in { animation: toast-in 200ms ease; }
+
+@keyframes gallery-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.gallery-fade { animation: gallery-fade 200ms ease; }
+
+dialog.sheet {
+  margin: 0;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 92dvh;
+  border: 0;
+  padding: 0;
+  background: var(--color-bg);
+  border-radius: 20px 20px 0 0;
+  transform: translateY(100%);
+  transition: transform 250ms ease;
+}
+dialog.sheet[open] { transform: translateY(0); }
+@starting-style {
+  dialog.sheet[open] { transform: translateY(100%); }
+}
+dialog.sheet::backdrop { background: rgba(37, 52, 79, 0.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

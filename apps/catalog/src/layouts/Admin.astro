@@ -1,0 +1,57 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  current?: 'productos' | 'stock' | 'categorias' | 'ajustes';
+  bare?: boolean;
+}
+const { title, current, bare = false } = Astro.props;
+const nav = [
+  ['productos', 'Productos', '/admin/productos'],
+  ['stock', 'Stock', '/admin/stock'],
+  ['categorias', 'Categorías y FAQs', '/admin/categorias'],
+  ['ajustes', 'Ajustes', '/admin/ajustes'],
+] as const;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Admin Leyma Shop</title>
+  </head>
+  <body class="min-h-dvh">
+    {
+      !bare && (
+        <header class="sticky top-0 z-10 border-b border-line bg-bg">
+          <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+            <a href="/admin/productos" class="font-serif text-xl font-semibold text-primary">
+              Leyma · Admin
+            </a>
+            <a href="/" class="text-sm text-muted underline">Ver tienda</a>
+          </div>
+          <nav class="mx-auto flex max-w-4xl gap-1 overflow-x-auto px-3 pb-2" aria-label="Admin">
+            {nav.map(([key, label, href]) => (
+              <a
+                href={href}
+                aria-current={current === key ? 'page' : undefined}
+                class:list={[
+                  'whitespace-nowrap rounded-full border px-4 py-2 text-sm',
+                  current === key
+                    ? 'border-primary bg-primary text-surface'
+                    : 'border-line text-muted',
+                ]}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        </header>
+      )
+    }
+    <main class="mx-auto max-w-4xl px-4 py-5"><slot /></main>
+  </body>
+</html>

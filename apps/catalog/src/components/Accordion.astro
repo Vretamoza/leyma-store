@@ -1,0 +1,22 @@
+---
+interface Props {
+  title: string;
+  open?: boolean;
+  /** Variante compacta para preguntas frecuentes. */
+  small?: boolean;
+}
+const { title, open = false, small = false } = Astro.props;
+---
+
+<details open={open} class="group border-b border-line">
+  <summary
+    class:list={[
+      'flex cursor-pointer list-none items-center justify-between gap-3 text-ink [&::-webkit-details-marker]:hidden',
+      small ? 'min-h-14 py-3 text-sm font-medium' : 'h-14 text-[15px] font-semibold',
+    ]}
+  >
+    {title}
+    <svg class="shrink-0 transition-transform duration-200 group-open:rotate-180" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+  </summary>
+  <div class="pb-[18px] text-sm leading-[1.6] text-ink"><slot /></div>
+</details>

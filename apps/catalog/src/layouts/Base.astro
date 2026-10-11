@@ -1,0 +1,36 @@
+---
+import '../styles/global.css';
+import type { Category, StoreSettings } from '@leyma/core';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  categories: Category[];
+  settings: StoreSettings;
+  current?: string;
+  query?: string;
+}
+const { title, description, categories, settings, current, query } = Astro.props;
+
+// Páginas públicas cacheables 30 s (para que un cambio del admin se vea en menos de 1 min); el stock se consulta en vivo en la ficha.
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60');
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="theme-color" content="#F8F4EF" />
+    <slot name="head" />
+  </head>
+  <body>
+    <Header categories={categories} current={current} query={query} />
+    <slot />
+    <Footer settings={settings} />
+  </body>
+</html>

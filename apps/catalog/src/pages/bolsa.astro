@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import BagView from '../features/bag/BagView';
+import { loadCatalog } from '../lib/data';
+
+export const prerender = false;
+
+const { categories, settings } = await loadCatalog();
+const store = { name: settings.store_name, whatsapp: settings.whatsapp_number };
+---
+
+<Base title={`Tu bolsa · ${settings.store_name}`} {categories} {settings}>
+  <Fragment slot="head"><meta name="robots" content="noindex" /></Fragment>
+  <main class="mx-auto max-w-[1280px] px-4 pb-10 pt-5 md:px-8 md:pb-20 md:pt-8">
+    <h1 class="font-serif text-[32px] font-semibold leading-none md:text-[48px]">Tu bolsa</h1>
+    <BagView client:only="react" {store} />
+  </main>
+</Base>

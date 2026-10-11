@@ -1,0 +1,58 @@
+---
+import {
+  applyFilters,
+  parseFilters,
+  parseSort,
+  productUndertones,
+  searchProducts,
+  sortProducts,
+} from '@leyma/core';
+import Base from '../layouts/Base.astro';
+import Listing from '../components/Listing.astro';
+import { loadCatalog, loadPopularity } from '../lib/data';
+
+export const prerender = false;
+
+const { categories, products, kitSizes, settings } = await loadCatalog();
+const q = (Astro.url.searchParams.get('q') ?? '').slice(0, 80);
+
+const found = searchProducts(products, q, categories);
+const filters = parseFilters(Astro.url.searchParams);
+const sort = parseSort(Astro.url.searchParams);
+const popularity = sort === 'pedidos' ? await loadPopularity() : {};
+const visible = sortProducts(applyFilters(found, filters, categories), sort, popularity);
+const showUndertone = found.some((p) => productUndertones(p).length > 0);
+---
+
+<Base title={q ? `“${q}” · ${settings.store_name}` : `Buscar · ${settings.store_name}`} {categories} {settings} query={q}>
+  <div class="mx-auto max-w-[1280px] px-4 pt-5 md:hidden">
+    <form action="/buscar" role="search">
+      <label for="q-mobile" class="sr-only">Buscar productos</label>
+      <input id="q-mobile" name="q" value={q} placeholder="Buscar productos" autofocus={!q}
+        class="h-12 w-full rounded-full border border-outline bg-surface px-5 text-[15px]" />
+    </form>
+  </div>
+  {q ? (
+    <Listing
+      title={`Resultados para “${q}”`}
+      total={found.length}
+      products={visible}
+      {categories}
+      {kitSizes}
+      lowStock={settings.low_stock_threshold}
+      newDays={settings.new_badge_days}
+      subcategories={[]}
+      {filters}
+      {sort}
+      {showUndertone}
+      action="/buscar"
+      query={q}
+      crumb="Búsqueda"
+    />
+  ) : (
+    <main class="mx-auto max-w-[1280px] px-4 py-10 md:px-8">
+      <h1 class="font-serif text-[38px] font-semibold leading-none md:text-[56px]">Buscar</h1>
+      <p class="mt-2 text-muted">Escribe el nombre, la categoría o una etiqueta del producto.</p>
+    </main>
+  )}
+</Base>

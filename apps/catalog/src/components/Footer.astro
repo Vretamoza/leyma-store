@@ -1,0 +1,45 @@
+---
+import type { StoreSettings } from '@leyma/core';
+
+interface Props {
+  settings: StoreSettings;
+}
+const { settings } = Astro.props;
+const year = new Date().getFullYear();
+const wa = settings.whatsapp_number && !/X/i.test(settings.whatsapp_number)
+  ? `https://wa.me/${settings.whatsapp_number}`
+  : null;
+const social = [
+  { label: 'Instagram', href: settings.instagram_url },
+  { label: 'TikTok', href: settings.tiktok_url },
+  { label: 'WhatsApp', href: wa },
+].filter((s): s is { label: string; href: string } => Boolean(s.href));
+const info = [
+  { title: 'Envíos', text: settings.shipping_info },
+  { title: 'Pagos', text: settings.payment_methods },
+  { title: 'Horario de atención', text: settings.business_hours },
+].filter((i) => i.text);
+---
+
+<footer class="mt-12 bg-primary pb-9 pt-8 text-bg md:mt-24">
+  <div class="mx-auto max-w-[1280px] px-4 md:px-8">
+    <div class="flex flex-col leading-none">
+      <span class="font-serif text-[30px] font-semibold">Leyma</span>
+      <span class="mt-[3px] text-[9px] tracking-[4px] text-bg/70">SHOP</span>
+    </div>
+    <div class="my-5 h-px w-12 bg-gold"></div>
+    <div class="grid gap-3 text-sm leading-normal md:grid-cols-3 md:gap-8">
+      {info.map((i) => (
+        <p><strong class="font-semibold">{i.title}</strong><br /><span class="text-bg/75">{i.text}</span></p>
+      ))}
+    </div>
+    {social.length > 0 && (
+      <div class="mt-5 flex flex-wrap gap-2">
+        {social.map((s) => (
+          <a href={s.href} class="flex h-11 items-center rounded-full border border-bg/30 px-4 text-sm text-bg no-underline hover:border-gold" rel="noopener">{s.label}</a>
+        ))}
+      </div>
+    )}
+    <p class="mt-6 text-xs text-bg/70">© {year} {settings.store_name}{settings.city ? ` · ${settings.city}` : ''}</p>
+  </div>
+</footer>

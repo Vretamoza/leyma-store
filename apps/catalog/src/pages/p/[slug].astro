@@ -1,0 +1,145 @@
+---
+import {
+  categoryTreeIds,
+  detailList,
+  detailRows,
+  eyebrow as buildEyebrow,
+  minPrice,
+  sortProducts,
+  variantParam,
+} from '@leyma/core';
+import Base from '../../layouts/Base.astro';
+import Accordion from '../../components/Accordion.astro';
+import ProductGrid from '../../components/ProductGrid.astro';
+import ProductView from '../../features/product/ProductView';
+import { artKind } from '../../lib/art';
+import { imageUrl, loadCatalog, loadProductExtras } from '../../lib/data';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const { categories, products, kitSizes, kitItems, settings } = await loadCatalog();
+
+const product = products.find((p) => p.slug === slug);
+if (!product) return new Response(null, { status: 404, statusText: 'Not found' });
+
+const { extras, faqs } = await loadProductExtras(product.id);
+const category = categories.find((c) => c.id === product.category_id) ?? null;
+const root = category?.parent_id ? categories.find((c) => c.id === category.parent_id) ?? category : category;
+
+const param = variantParam(product.variant_label);
+const initialKey = Astro.url.searchParams.get(param);
+
+const rows = detailRows(extras.details);
+const usage = detailList(extras.details, 'modo_de_uso');
+const ingredients = detailList(extras.details, 'ingredientes');
+const sizeGuide = detailList(extras.details, 'guia_tallas');
+const included = kitItems
+  .filter((k) => k.kit_product_id === product.id)
+  .map((k) => ({ ...k, item: products.find((p) => p.id === k.item_product_id) }))
+  .filter((k) => k.item);
+
+// Relacionados: misma categoría principal, sin el propio producto.
+const treeIds = new Set(root ? categoryTreeIds(categories, root.id) : []);
+const related = sortProducts(
+  products.filter((p) => p.id !== product.id && p.category_id && treeIds.has(p.category_id)),
+  'novedades',
+).slice(0, 4);
+
+const ogImage = product.product_images.find((i) => i.variant_id === null) ?? product.product_images[0];
+const title = `${product.name}${product.brand ? ` · ${product.brand}` : ''} · ${settings.store_name}`;
+const description = product.short_description ?? `${product.name} en ${settings.store_name}. Pide por WhatsApp.`;
+const canonical = new URL(`/p/${product.slug}`, Astro.url).href;
+
+const store = {
+  name: settings.store_name,
+  whatsapp: settings.whatsapp_number,
+  lowStock: settings.low_stock_threshold,
+  newDays: settings.new_badge_days,
+};
+const eyebrow = buildEyebrow(category?.name ?? null, extras.details, product.brand, product.product_type);
+const common = { categories, kitSizes, lowStock: settings.low_stock_threshold, newDays: settings.new_badge_days };
+const h2 = 'font-serif text-2xl font-semibold';
+---
+
+<Base title={title} {description} {categories} {settings} current={root?.slug}>
+  <Fragment slot="head">
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="product" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={imageUrl(ogImage.path)} />}
+    <meta property="product:price:amount" content={String(minPrice(product))} />
+    <meta property="product:price:currency" content="COP" />
+  </Fragment>
+
+  <main class="mx-auto max-w-[1280px] px-4 pb-28 md:px-8 md:pb-20">
+    <nav aria-label="Ruta" class="flex flex-wrap gap-1.5 py-3 text-xs text-muted md:py-5 md:text-[13px]">
+      <a href="/" class="text-muted no-underline">Inicio</a><span aria-hidden="true">/</span>
+      {root && <a href={`/c/${root.slug}`} class="text-muted no-underline">{root.name}</a>}
+      {category && root && category.id !== root.id && (
+        <><span aria-hidden="true">/</span><a href={`/c/${category.slug}`} class="text-muted no-underline">{category.name}</a></>
+      )}
+      <span aria-hidden="true">/</span><span class="text-ink">{product.name}</span>
+    </nav>
+
+    <ProductView client:load {product} {initialKey} {eyebrow} art={artKind(product, categories)} {store}>
+      <div class="mt-7 border-t border-line">
+        {extras.description && <Accordion title="Descripción" open><p class="whitespace-pre-line">{extras.description}</p></Accordion>}
+        {rows.length > 0 && (
+          <Accordion title="Detalles" open={!extras.description}>
+            <dl class="grid grid-cols-[120px_1fr] gap-y-2.5">
+              {rows.map((r) => (<><dt class="text-muted">{r.label}</dt><dd class="m-0">{r.value}</dd></>))}
+            </dl>
+          </Accordion>
+        )}
+        {usage.length > 0 && (
+          <Accordion title="Modo de uso">
+            {usage.length > 1 ? <ol class="list-decimal pl-[18px]">{usage.map((u) => <li>{u}</li>)}</ol> : <p>{usage[0]}</p>}
+          </Accordion>
+        )}
+        {ingredients.length > 0 && <Accordion title="Ingredientes"><p class="text-[13px]">{ingredients.join(', ')}</p></Accordion>}
+        {included.length > 0 && (
+          <Accordion title="Qué incluye" open>
+            <ul class="m-0 list-none p-0">
+              {included.map((k) => (
+                <li class="flex items-center justify-between gap-3 py-1.5">
+                  <a href={`/p/${k.item?.slug}`} class="text-ink underline">{k.item?.name}</a>
+                  <span class="text-muted">x{k.quantity}</span>
+                </li>
+              ))}
+            </ul>
+          </Accordion>
+        )}
+        {sizeGuide.length > 0 && <Accordion title="Guía de tallas">{sizeGuide.map((l) => <p>{l}</p>)}</Accordion>}
+      </div>
+
+      {(settings.shipping_info || settings.payment_methods) && (
+        <section aria-labelledby="env-h" class="mt-7 rounded-xl border border-line bg-surface p-[18px]">
+          <h2 id="env-h" class:list={[h2, 'mb-3.5 !text-[22px]']}>Envíos y pagos</h2>
+          <div class="flex flex-col gap-3.5 text-sm leading-[1.45]">
+            {settings.shipping_info && <p><strong class="font-semibold">Envíos</strong><br /><span class="text-muted">{settings.shipping_info}</span></p>}
+            {settings.payment_methods && <p><strong class="font-semibold">Pagas al confirmar por WhatsApp</strong><br /><span class="text-muted">{settings.payment_methods}</span></p>}
+          </div>
+        </section>
+      )}
+
+      {faqs.length > 0 && (
+        <section aria-labelledby="faq-h" class="mt-8">
+          <h2 id="faq-h" class:list={[h2, 'mb-1.5']}>Preguntas frecuentes</h2>
+          <div class="border-t border-line">
+            {faqs.map((f) => <Accordion title={f.question} small><p>{f.answer}</p></Accordion>)}
+          </div>
+        </section>
+      )}
+    </ProductView>
+
+    {related.length > 0 && (
+      <section aria-labelledby="rel-h" class="mt-12 md:mt-20">
+        <h2 id="rel-h" class:list={[h2, 'mb-3.5 md:mb-6 md:!text-[34px]']}>Combínalo con</h2>
+        <ProductGrid products={related} {...common} class="md:grid-cols-4" />
+      </section>
+    )}
+  </main>
+</Base>

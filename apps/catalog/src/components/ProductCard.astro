@@ -1,0 +1,75 @@
+---
+import type { Category, Product } from '@leyma/core';
+import { cardMeta, formatCOP, isNew, minPrice, productStatus, swatchPreview } from '@leyma/core';
+import { imageUrl } from '../lib/data';
+import Placeholder from './Placeholder.astro';
+import { artKind } from '../lib/art';
+
+interface Props {
+  product: Product;
+  categories: Category[];
+  kitSize?: number;
+  lowStock: number;
+  newDays: number;
+  /** La primera fila carga de inmediato; el resto, perezoso. */
+  eager?: boolean;
+}
+const { product, categories, kitSize = 0, lowStock, newDays, eager = false } = Astro.props;
+
+const status = productStatus(product, lowStock);
+const showNew = status !== 'out' && isNew(product.created_at, newDays);
+const price = minPrice(product);
+const hasOld = product.compare_at_price !== null && product.compare_at_price > price;
+const { colors, more } = swatchPreview(product);
+const meta = cardMeta(product, kitSize);
+
+const photo = [...product.product_images]
+  .sort((a, b) => a.sort_order - b.sort_order)
+  .find((i) => i.variant_id === null) ?? product.product_images[0];
+
+const kind = artKind(product, categories);
+const hex = colors[0] ?? '#D6AB84';
+---
+
+<a href={`/p/${product.slug}`} class="block text-ink no-underline">
+  <div class="relative aspect-[4/5] overflow-hidden rounded-xl border border-line bg-ph">
+    {photo ? (
+      <img
+        src={imageUrl(photo.path)}
+        alt={photo.alt ?? product.name}
+        width="400"
+        height="500"
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        class="h-full w-full object-cover"
+      />
+    ) : (
+      <Placeholder kind={kind} hex={hex} label={product.name} />
+    )}
+    {status === 'out' && <span class="absolute inset-0 bg-bg/45"></span>}
+    {showNew && (
+      <span class="absolute left-2.5 top-2.5 rounded-full border border-gold bg-surface px-2.5 py-[3px] text-[10px] font-semibold tracking-wide text-gold-ink">NUEVO</span>
+    )}
+    {status === 'low' && !showNew && (
+      <span class="absolute left-2.5 top-2.5 rounded-full bg-gold-tint px-2.5 py-[3px] text-[11px] font-semibold text-gold-ink">Últimas unidades</span>
+    )}
+    {status === 'out' && (
+      <span class="absolute left-2.5 top-2.5 rounded-full border border-outline bg-surface px-2.5 py-[3px] text-[11px] font-semibold text-ink">Agotado</span>
+    )}
+  </div>
+  {product.brand && <p class="mt-2.5 text-[11px] font-semibold uppercase tracking-[1.2px] text-muted">{product.brand}</p>}
+  <p class:list={['mb-0.5 text-sm leading-snug md:text-[15px]', !product.brand && 'mt-2.5']}>{product.name}</p>
+  <p class:list={['text-sm font-semibold md:text-[15px]', status === 'out' && 'text-muted']}>
+    {formatCOP(price)}
+    {hasOld && <span class="ml-1 font-normal text-muted line-through">{formatCOP(product.compare_at_price as number)}</span>}
+  </p>
+  {colors.length > 0 && (
+    <div class="mt-1.5 flex items-center gap-1">
+      {colors.map((c) => (
+        <span class="size-3 rounded-full md:size-3.5" style={`background:${c};box-shadow:inset 0 0 0 1px rgba(37,52,79,.14)`}></span>
+      ))}
+      {more > 0 && <span class="ml-0.5 text-xs text-muted md:text-[13px]">+{more} {more === 1 ? 'tono' : 'tonos'}</span>}
+    </div>
+  )}
+  {meta && <p class="mt-1.5 text-xs text-muted md:text-[13px]">{meta}</p>}
+</a>

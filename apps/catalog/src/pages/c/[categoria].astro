@@ -1,0 +1,62 @@
+---
+import {
+  applyFilters,
+  categoryTreeIds,
+  parseFilters,
+  parseSort,
+  productUndertones,
+  sortProducts,
+} from '@leyma/core';
+import Base from '../../layouts/Base.astro';
+import Listing from '../../components/Listing.astro';
+import { loadCatalog, loadPopularity } from '../../lib/data';
+
+export const prerender = false;
+
+const { categoria } = Astro.params;
+const { categories, products, kitSizes, settings } = await loadCatalog();
+
+const category = categories.find((c) => c.slug === categoria);
+if (!category) return new Response(null, { status: 404, statusText: 'Not found' });
+
+// Una subcategoría muestra el menú de su categoría principal.
+const root = category.parent_id ? categories.find((c) => c.id === category.parent_id) ?? category : category;
+const treeIds = new Set(categoryTreeIds(categories, category.id));
+const inCategory = products.filter((p) => p.category_id && treeIds.has(p.category_id));
+
+const children = categories.filter((c) => c.parent_id === category.id);
+const subcategories = children.map((c) => {
+  const ids = new Set(categoryTreeIds(categories, c.id));
+  return { name: c.name, slug: c.slug, count: inCategory.filter((p) => p.category_id && ids.has(p.category_id)).length };
+});
+
+const filters = parseFilters(Astro.url.searchParams);
+const sort = parseSort(Astro.url.searchParams);
+const popularity = sort === 'pedidos' ? await loadPopularity() : {};
+const visible = sortProducts(applyFilters(inCategory, filters, categories), sort, popularity);
+const showUndertone = inCategory.some((p) => productUndertones(p).length > 0);
+---
+
+<Base
+  title={`${category.name} · ${settings.store_name}`}
+  description={`${category.name} en ${settings.store_name}. Elige tu producto y pide por WhatsApp.`}
+  categories={categories}
+  {settings}
+  current={root.slug}
+>
+  <Listing
+    title={category.name}
+    total={inCategory.length}
+    products={visible}
+    {categories}
+    {kitSizes}
+    lowStock={settings.low_stock_threshold}
+    newDays={settings.new_badge_days}
+    {subcategories}
+    {filters}
+    {sort}
+    {showUndertone}
+    action={`/c/${category.slug}`}
+    crumb={category.name}
+  />
+</Base>

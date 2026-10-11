@@ -1,0 +1,125 @@
+---
+import { categoryTreeIds, sortProducts, isNew } from '@leyma/core';
+import Base from '../layouts/Base.astro';
+import ProductGrid from '../components/ProductGrid.astro';
+import Placeholder from '../components/Placeholder.astro';
+import { imageUrl, loadCatalog } from '../lib/data';
+
+export const prerender = false;
+
+const { categories, products, kitSizes, settings } = await loadCatalog();
+const roots = categories.filter((c) => !c.parent_id);
+
+const countFor = (id: string) => {
+  const ids = new Set(categoryTreeIds(categories, id));
+  return products.filter((p) => p.category_id && ids.has(p.category_id)).length;
+};
+const kindFor = (slug: string) =>
+  ({ kits: 'kit', ropa: 'garment', 'accesorios-faciales': 'gems' } as const)[slug as 'kits'] ?? 'bottle';
+
+const newest = sortProducts(products, 'novedades');
+const novedades = newest.filter((p) => isNew(p.created_at, settings.new_badge_days)).slice(0, 8);
+const destacados = products.filter((p) => p.is_featured).slice(0, 8);
+const common = { categories, kitSizes, lowStock: settings.low_stock_threshold, newDays: settings.new_badge_days };
+
+const steps = [
+  { title: 'Elige', text: 'Mira fotos, tonos y disponibilidad en cada ficha.' },
+  { title: 'Agrega a tu bolsa', text: 'Ajusta tono y cantidad. Ves el total al instante.' },
+  { title: 'Envía por WhatsApp', text: 'El mensaje sale escrito. Confirmamos envío y pago contigo.' },
+];
+const h2 = 'font-serif text-[30px] font-semibold md:text-[44px]';
+---
+
+<Base
+  title={`${settings.store_name} · Maquillaje, kits y accesorios`}
+  description="Maquillaje, kits y detalles que se notan. Arma tu bolsa y envíanos el pedido por WhatsApp."
+  {categories}
+  {settings}
+>
+  <main class="mx-auto max-w-[1280px] px-4 md:px-8">
+    <section class="flex flex-wrap items-center gap-6 pt-7 md:gap-14 md:pt-14">
+      <div class="flex-[1_1_420px]">
+        <p class="text-xs tracking-[2px] text-gold-ink md:text-[13px]">NUEVA COLECCIÓN · GLAM NIGHT</p>
+        <h1 class="mt-2.5 font-serif text-[44px] font-medium leading-none md:mt-4 md:text-[76px] md:leading-[0.98]">
+          Brilla a tu manera, <em class="text-secondary">sin complicarte</em>
+        </h1>
+        <p class="mt-3.5 max-w-[460px] text-[15px] leading-[1.55] text-muted md:mt-5 md:text-lg">
+          Maquillaje, kits y detalles que se notan. Arma tu bolsa y envíanos el pedido por WhatsApp.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-2.5 md:mt-8 md:gap-3">
+          <a href={roots[0] ? `/c/${roots[0].slug}` : '/'} class="flex h-12 items-center rounded-full bg-primary px-[22px] text-[15px] font-semibold text-bg no-underline hover:bg-primary-dark md:h-[54px] md:px-[30px] md:text-base">Ver novedades</a>
+          <a href="#como-pedir" class="flex h-12 items-center rounded-full border border-outline px-[18px] text-[15px] font-medium text-ink no-underline md:h-[54px] md:px-[26px] md:text-base">Cómo pedir</a>
+        </div>
+      </div>
+      <div class="min-w-0 flex-[1_1_320px] overflow-hidden rounded-xl border border-line bg-tint">
+        <div class="mx-auto aspect-[4/3] max-w-[520px]">
+          <svg viewBox="0 0 640 480" width="100%" height="100%" role="img" aria-label="Kit Glam Night con labial y pepitas doradas" style="display:block">
+            <rect width="640" height="480" fill="#E6EAEF"></rect>
+            <rect x="90" y="150" width="300" height="210" rx="16" fill="#25344F"></rect>
+            <circle cx="155" cy="205" r="30" fill="#C9A66B"></circle><circle cx="240" cy="205" r="30" fill="#8E5A5F"></circle><circle cx="325" cy="205" r="30" fill="#5C3A3F"></circle>
+            <circle cx="155" cy="295" r="30" fill="#E8C3B9"></circle><circle cx="240" cy="295" r="30" fill="#617891"></circle><circle cx="325" cy="295" r="30" fill="#3A2B2E"></circle>
+            <rect x="440" y="170" width="48" height="200" rx="6" fill="#25344F"></rect><rect x="446" y="132" width="36" height="42" fill="#D9C7A6"></rect><path d="M450 132 L450 76 L478 60 L478 132 Z" fill="#25344F"></path>
+            <circle cx="540" cy="120" r="8" fill="#C9A66B"></circle><circle cx="566" cy="160" r="5" fill="#FFFFFF"></circle><circle cx="532" cy="200" r="6" fill="#C9A66B"></circle><path d="M570 240 l11 18 -11 18 -11 -18z" fill="#C9A66B"></path>
+            <ellipse cx="290" cy="400" rx="240" ry="12" fill="#25344F" opacity="0.06"></ellipse>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="cat-h" class="pt-11 md:pt-24">
+      <h2 id="cat-h" class:list={[h2, 'mb-4 md:mb-6']}>Categorías</h2>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-6">
+        {roots.map((c) => (
+          <a href={`/c/${c.slug}`} class="overflow-hidden rounded-xl border border-line bg-surface text-ink no-underline">
+            <div class="aspect-square bg-ph">
+              {c.image_path ? (
+                <img src={imageUrl(c.image_path)} alt="" width="400" height="400" loading="lazy" class="h-full w-full object-cover" />
+              ) : (
+                <Placeholder kind={kindFor(c.slug)} hex="#D6AB84" label={c.name} />
+              )}
+            </div>
+            <div class="flex items-center justify-between gap-2 px-3 pb-3.5 pt-3 md:px-[18px] md:py-4">
+              <span class="text-[15px] font-medium md:text-[17px]">{c.name}</span>
+              <span class="hidden text-[13px] text-muted md:inline">{countFor(c.id)} {countFor(c.id) === 1 ? 'producto' : 'productos'}</span>
+              <svg class="md:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A55A6D" stroke-width="1.6" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {novedades.length > 0 && (
+      <section aria-labelledby="nov-h" class="pt-11 md:pt-24">
+        <div class="mb-4 flex items-baseline justify-between md:mb-6">
+          <h2 id="nov-h" class={h2}>Novedades</h2>
+        </div>
+        <ProductGrid products={novedades} {...common} />
+      </section>
+    )}
+
+    {destacados.length > 0 && (
+      <section aria-labelledby="des-h" class="pt-11 md:pt-24">
+        <div class="mb-4 flex items-baseline justify-between md:mb-6">
+          <h2 id="des-h" class={h2}>Destacados</h2>
+        </div>
+        <ProductGrid products={destacados} {...common} />
+      </section>
+    )}
+
+    <section id="como-pedir" aria-labelledby="como-h" class="mt-12 rounded-xl bg-primary px-5 py-7 text-bg md:mt-24 md:px-12 md:py-14">
+      <h2 id="como-h" class:list={[h2, 'text-center']}>Cómo pedir</h2>
+      <p class="mb-5 mt-1.5 text-center text-sm text-bg/75">Sin registro y sin pagos en la página</p>
+      <ol class="m-0 grid list-none gap-4 p-0 md:grid-cols-3 md:gap-6">
+        {steps.map((s, i) => (
+          <li class="flex items-start gap-4 rounded-xl bg-surface p-4 text-ink md:p-6">
+            <span class="w-6 font-serif text-[34px] leading-none text-gold-ink">{i + 1}</span>
+            <div>
+              <p class="text-[15px] font-semibold">{s.title}</p>
+              <p class="mt-1 text-sm leading-normal text-muted">{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </main>
+</Base>
