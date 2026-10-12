@@ -35,7 +35,7 @@ const destacados = products.filter((p) => p.is_featured).slice(0, 8);
 const common = { categories, kitSizes, lowStock: lowStockLimit(settings), newDays: settings.new_badge_days };
 
 const heroSlides = [
-  { src: '/hero/belleza-rosados.webp', alt: 'Tu belleza, tus reglas. Explora nuestra colección de maquillaje', href: roots[0] ? `/c/${roots[0].slug}` : '/' },
+  { src: '/hero/belleza-rosados.webp', mobileSrc: '/hero/belleza-rosados-mobile.webp', alt: 'Tu belleza, tus reglas. Explora nuestra colección de maquillaje', href: roots[0] ? `/c/${roots[0].slug}` : '/' },
 ];
 
 const steps = [

@@ -1,6 +1,8 @@
 ---
 interface Slide {
   src: string;
+  /** Versión vertical para pantallas menores a 768px. */
+  mobileSrc?: string;
   alt: string;
   href?: string;
 }
@@ -19,15 +21,18 @@ const arrow = 'absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center j
   <div class="hero-track flex snap-x snap-mandatory overflow-x-auto" style="scrollbar-width:none">
     {slides.map((s, i) => {
       const img = (
-        <img
-          src={s.src}
-          alt={s.alt}
-          width="2000"
-          height="727"
-          loading={i === 0 ? 'eager' : 'lazy'}
-          fetchpriority={i === 0 ? 'high' : 'auto'}
-          class="block aspect-[2000/727] h-full w-full object-cover"
-        />
+        <picture>
+          {s.mobileSrc && <source media="(max-width: 767px)" srcset={s.mobileSrc} />}
+          <img
+            src={s.src}
+            alt={s.alt}
+            width="2000"
+            height="727"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'auto'}
+            class:list={['block h-full w-full object-cover md:aspect-[2000/727]', s.mobileSrc ? 'aspect-[2/3]' : 'aspect-[2000/727]']}
+          />
+        </picture>
       );
       return (
         <div class="hero-slide w-full shrink-0 snap-center" role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de ${slides.length}`}>
