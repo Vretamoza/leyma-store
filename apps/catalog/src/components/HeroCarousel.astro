@@ -1,0 +1,106 @@
+---
+interface Slide {
+  src: string;
+  alt: string;
+  href?: string;
+}
+
+interface Props {
+  slides: Slide[];
+  /** Segundos que se ve cada imagen antes de pasar a la siguiente. */
+  interval?: number;
+}
+const { slides, interval = 6 } = Astro.props;
+const many = slides.length > 1;
+const arrow = 'absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border-0 bg-surface/80 text-ink shadow md:flex';
+---
+
+<section class="hero relative w-full overflow-hidden bg-tint" data-interval={interval} aria-roledescription="carrusel" aria-label="Destacados">
+  <div class="hero-track flex snap-x snap-mandatory overflow-x-auto" style="scrollbar-width:none">
+    {slides.map((s, i) => {
+      const img = (
+        <img
+          src={s.src}
+          alt={s.alt}
+          width="2000"
+          height="727"
+          loading={i === 0 ? 'eager' : 'lazy'}
+          fetchpriority={i === 0 ? 'high' : 'auto'}
+          class="block aspect-[2000/727] h-full w-full object-cover"
+        />
+      );
+      return (
+        <div class="hero-slide w-full shrink-0 snap-center" role="group" aria-roledescription="diapositiva" aria-label={`${i + 1} de ${slides.length}`}>
+          {s.href ? <a href={s.href} class="block">{img}</a> : img}
+        </div>
+      );
+    })}
+  </div>
+
+  {many && (
+    <>
+      <button type="button" class:list={[arrow, 'left-3']} data-dir="-1" aria-label="Anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </button>
+      <button type="button" class:list={[arrow, 'right-3']} data-dir="1" aria-label="Siguiente">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+      </button>
+      <div class="absolute inset-x-0 bottom-2 flex justify-center gap-2 md:bottom-3">
+        {slides.map((_, i) => (
+          <button type="button" class="hero-dot h-2 w-2 rounded-full border-0 bg-ink/30 p-0" data-index={i} aria-label={`Ir a la imagen ${i + 1}`}></button>
+        ))}
+      </div>
+    </>
+  )}
+</section>
+
+<style is:global>
+  .hero-track::-webkit-scrollbar {
+    display: none;
+  }
+  .hero-dot[aria-current='true'] {
+    background: var(--color-primary, #25344f);
+    width: 20px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.hero').forEach((hero) => {
+    const track = hero.querySelector<HTMLElement>('.hero-track')!;
+    const slides = hero.querySelectorAll<HTMLElement>('.hero-slide');
+    const dots = hero.querySelectorAll<HTMLElement>('.hero-dot');
+    const n = slides.length;
+    if (n < 2) return;
+
+    const current = () => Math.round(track.scrollLeft / track.clientWidth);
+    const goTo = (i: number) => {
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      track.scrollTo({ left: ((i + n) % n) * track.clientWidth, behavior: reduce ? 'auto' : 'smooth' });
+    };
+    const paint = () => dots.forEach((d, i) => d.setAttribute('aria-current', String(i === current())));
+
+    track.addEventListener('scroll', paint, { passive: true });
+    hero.querySelectorAll<HTMLElement>('[data-dir]').forEach((b) =>
+      b.addEventListener('click', () => goTo(current() + Number(b.dataset.dir))),
+    );
+    dots.forEach((d) => d.addEventListener('click', () => goTo(Number(d.dataset.index))));
+    paint();
+
+    // Avance automático; se pausa al interactuar o si el usuario prefiere menos movimiento.
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ms = Number(hero.dataset.interval) * 1000;
+    let timer: number | undefined;
+    const start = () => {
+      stop();
+      timer = window.setInterval(() => goTo(current() + 1), ms);
+    };
+    const stop = () => window.clearInterval(timer);
+    hero.addEventListener('mouseenter', stop);
+    hero.addEventListener('mouseleave', start);
+    hero.addEventListener('focusin', stop);
+    hero.addEventListener('focusout', start);
+    hero.addEventListener('touchstart', stop, { passive: true });
+    hero.addEventListener('touchend', start, { passive: true });
+    start();
+  });
+</script>

@@ -3,6 +3,7 @@ import { categoryTreeIds, sortProducts, isNew } from '@leyma/core';
 import Base from '../layouts/Base.astro';
 import ProductGrid from '../components/ProductGrid.astro';
 import CategoryCarousel from '../components/CategoryCarousel.astro';
+import HeroCarousel from '../components/HeroCarousel.astro';
 import { loadCatalog, lowStockLimit } from '../lib/data';
 
 export const prerender = false;
@@ -33,6 +34,10 @@ const novedades = newest.filter((p) => isNew(p.created_at, settings.new_badge_da
 const destacados = products.filter((p) => p.is_featured).slice(0, 8);
 const common = { categories, kitSizes, lowStock: lowStockLimit(settings), newDays: settings.new_badge_days };
 
+const heroSlides = [
+  { src: '/hero/belleza-rosados.webp', alt: 'Tu belleza, tus reglas. Explora nuestra colección de maquillaje', href: roots[0] ? `/c/${roots[0].slug}` : '/' },
+];
+
 const steps = [
   { title: 'Elige', text: 'Mira fotos, tonos y disponibilidad en cada ficha.' },
   { title: 'Agrega a tu bolsa', text: 'Ajusta tono y cantidad. Ves el total al instante.' },
@@ -47,36 +52,10 @@ const h2 = 'font-serif text-[30px] font-semibold md:text-[44px]';
   {categories}
   {settings}
 >
-  <main class="mx-auto max-w-[1280px] px-4 md:px-8">
-    <section class="flex flex-wrap items-center gap-6 pt-7 md:gap-14 md:pt-14">
-      <div class="flex-[1_1_420px]">
-        <p class="text-xs tracking-[2px] text-gold-ink md:text-[13px]">NUEVA COLECCIÓN · GLAM NIGHT</p>
-        <h1 class="mt-2.5 font-serif text-[44px] font-medium leading-none md:mt-4 md:text-[76px] md:leading-[0.98]">
-          Brilla a tu manera, <em class="text-secondary">sin complicarte</em>
-        </h1>
-        <p class="mt-3.5 max-w-[460px] text-[15px] leading-[1.55] text-muted md:mt-5 md:text-lg">
-          Maquillaje, kits y detalles que se notan. Arma tu bolsa y envíanos el pedido por WhatsApp.
-        </p>
-        <div class="mt-5 flex flex-wrap gap-2.5 md:mt-8 md:gap-3">
-          <a href={roots[0] ? `/c/${roots[0].slug}` : '/'} class="flex h-12 items-center rounded-full bg-primary px-[22px] text-[15px] font-semibold text-bg no-underline hover:bg-primary-dark md:h-[54px] md:px-[30px] md:text-base">Ver novedades</a>
-          <a href="#como-pedir" class="flex h-12 items-center rounded-full border border-outline px-[18px] text-[15px] font-medium text-ink no-underline md:h-[54px] md:px-[26px] md:text-base">Cómo pedir</a>
-        </div>
-      </div>
-      <div class="min-w-0 flex-[1_1_320px] overflow-hidden rounded-xl border border-line bg-tint">
-        <div class="mx-auto aspect-[4/3] max-w-[520px]">
-          <svg viewBox="0 0 640 480" width="100%" height="100%" role="img" aria-label="Kit Glam Night con labial y pepitas doradas" style="display:block">
-            <rect width="640" height="480" fill="#E6EAEF"></rect>
-            <rect x="90" y="150" width="300" height="210" rx="16" fill="#25344F"></rect>
-            <circle cx="155" cy="205" r="30" fill="#C9A66B"></circle><circle cx="240" cy="205" r="30" fill="#8E5A5F"></circle><circle cx="325" cy="205" r="30" fill="#5C3A3F"></circle>
-            <circle cx="155" cy="295" r="30" fill="#E8C3B9"></circle><circle cx="240" cy="295" r="30" fill="#617891"></circle><circle cx="325" cy="295" r="30" fill="#3A2B2E"></circle>
-            <rect x="440" y="170" width="48" height="200" rx="6" fill="#25344F"></rect><rect x="446" y="132" width="36" height="42" fill="#D9C7A6"></rect><path d="M450 132 L450 76 L478 60 L478 132 Z" fill="#25344F"></path>
-            <circle cx="540" cy="120" r="8" fill="#C9A66B"></circle><circle cx="566" cy="160" r="5" fill="#FFFFFF"></circle><circle cx="532" cy="200" r="6" fill="#C9A66B"></circle><path d="M570 240 l11 18 -11 18 -11 -18z" fill="#C9A66B"></path>
-            <ellipse cx="290" cy="400" rx="240" ry="12" fill="#25344F" opacity="0.06"></ellipse>
-          </svg>
-        </div>
-      </div>
-    </section>
+  <h1 class="sr-only">{settings.store_name}: maquillaje, kits y accesorios</h1>
+  <HeroCarousel slides={heroSlides} />
 
+  <main class="mx-auto max-w-[1280px] px-4 md:px-8">
     <section aria-labelledby="cat-h" class="pt-11 md:pt-24">
       <h2 id="cat-h" class:list={[h2, 'mb-4 md:mb-6']}>Categorías</h2>
       <div class="grid grid-cols-2 gap-3 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-6">
